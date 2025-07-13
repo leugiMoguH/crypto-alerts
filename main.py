@@ -1,7 +1,6 @@
 import os
 import requests
 import pandas as pd
-import ta
 from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator, MACD
 
