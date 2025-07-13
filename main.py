@@ -1,7 +1,8 @@
 import os
 import requests
 import pandas as pd
-import pandas_ta as ta
+from ta.trend import EMAIndicator, MACD
+from ta.momentum import RSIIndicator
 from datetime import datetime
 from telegram import Bot
 
@@ -27,37 +28,45 @@ def fetch_data(symbol):
     data = r.json()
     if data.get("Response") != "Success":
         raise Exception(f"Erro CryptoCompare: {data}")
+
     df = pd.DataFrame(data["Data"]["Data"])
     df["datetime"] = pd.to_datetime(df["time"], unit="s")
     df.set_index("datetime", inplace=True)
     return df
 
-def analisar_moeda(symbol):
-    try:
-        df = fetch_data(symbol)
-        df["RSI"] = ta.rsi(df["close"], length=14)
-        df["SMA20"] = df["close"].rolling(20).mean()
-        df["SMA50"] = df["close"].rolling(50).mean()
+def analisar_indicadores(df):
+    ema = EMAIndicator(close=df["close"], window=14)
+    df["ema"] = ema.ema_indicator()
 
-        rsi = round(df["RSI"].iloc[-1], 2)
-        price = round(df["close"].iloc[-1], 4)
+    rsi = RSIIndicator(close=df["close"], window=14)
+    df["rsi"] = rsi.rsi()
 
-        if rsi > 70:
-            return f"🔴 **VENDE 1€ {symbol}** (RSI {rsi})\n💰 Preço: €{price}"
-        elif rsi < 30:
-            return f"🟢 **COMPRA 1€ {symbol}** (RSI {rsi})\n💰 Preço: €{price}"
-        else:
-            return None
-    except Exception as e:
-        return f"⚠️ Erro {symbol}: {str(e)}"
+    macd = MACD(close=df["close"])
+    df["macd"] = macd.macd()
+    df["macd_signal"] = macd.macd_signal()
+    df["macd_diff"] = macd.macd_diff()
+
+    return df
+
+def verificar_sinal(df):
+    ult = df.iloc[-1]
+    if ult["rsi"] < 30 and ult["macd_diff"] > 0 and ult["close"] > ult["ema"]:
+        return True
+    return False
+
+def enviar_alerta(moeda, preco):
+    mensagem = f"💰 Alerta de compra antecipado para {moeda}!\nPreço atual: {preco:.4f} EUR"
+    bot.send_message(chat_id=CHAT_ID, text=mensagem)
 
 def main():
-    bot.send_message(chat_id=CHAT_ID, text="🔍 A analisar oportunidades...")
-
     for coin in COINS:
-        msg = analisar_moeda(coin)
-        if msg:
-            bot.send_message(chat_id=CHAT_ID, text=msg)
+        try:
+            df = fetch_data(coin)
+            df = analisar_indicadores(df)
+            if verificar_sinal(df):
+                enviar_alerta(coin, df["close"].iloc[-1])
+        except Exception as e:
+            print(f"Erro com {coin}: {e}")
 
 if __name__ == "__main__":
     main()
