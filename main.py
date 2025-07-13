@@ -1,8 +1,10 @@
 import os
 import requests
 import pandas as pd
-from ta.trend import EMAIndicator, MACD
+import ta
 from ta.momentum import RSIIndicator
+from ta.trend import EMAIndicator, MACD
+
 from datetime import datetime
 from telegram import Bot
 
