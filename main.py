@@ -56,8 +56,17 @@ def verificar_sinal(df):
     return False
 
 def enviar_alerta(moeda, preco):
-    mensagem = f"💰 Alerta de compra antecipado para {moeda}!\nPreço atual: {preco:.4f} EUR"
+    venda_15 = preco * 1.15
+    venda_30 = preco * 1.30
+    mensagem = (
+        f"💰 Alerta de COMPRA antecipado para {moeda}!\n"
+        f"🔹 Preço atual: {preco:.4f} EUR\n\n"
+        f"📈 Ordens de venda sugeridas:\n"
+        f"▫️ +15% → {venda_15:.4f} EUR (retirar capital)\n"
+        f"▫️ +30% → {venda_30:.4f} EUR (venda total)"
+    )
     bot.send_message(chat_id=CHAT_ID, text=mensagem)
+
 
 def main():
     for coin in COINS:
