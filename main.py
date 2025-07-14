@@ -51,6 +51,7 @@ def analisar_indicadores(df):
 
 def verificar_sinal(df):
     ult = df.iloc[-1]
+    print(f"Análise: close={ult['close']}, ema={ult['ema']}, rsi={ult['rsi']}, macd_diff={ult['macd_diff']}")
     if ult["rsi"] < 30 and ult["macd_diff"] > 0 and ult["close"] > ult["ema"]:
         return True
     return False
@@ -71,6 +72,7 @@ def enviar_alerta(moeda, preco):
 def main():
     for coin in COINS:
         try:
+            print(f" A analisar {coin}...")
             df = fetch_data(coin)
             df = analisar_indicadores(df)
             if verificar_sinal(df):
