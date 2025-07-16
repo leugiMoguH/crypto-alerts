@@ -100,7 +100,10 @@ def enviar_resumo():
     bot.send_message(chat_id=CHAT_ID, text=texto)
 
 def main():
-    print("[INÍCIO] A iniciar análise de oportunidades...")
+    mensagem_inicio = "\u23f0 A iniciar análise de oportunidades..."
+    print(f"[INÍCIO] {mensagem_inicio}")
+    bot.send_message(chat_id=CHAT_ID, text=mensagem_inicio)
+
     houve_alertas = False
     for coin in COINS:
         try:
