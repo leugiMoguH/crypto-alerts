@@ -80,5 +80,17 @@ def main():
         except Exception as e:
             print(f"Erro com {coin}: {e}")
 
-if __name__ == "__main__":
-    main()
+def main():
+    try:
+        bot.send_message(chat_id=CHAT_ID, text="🚀 A iniciar nova análise de mercado de criptomoedas...")
+    except Exception as e:
+        print(f"Erro ao enviar mensagem de início: {e}")
+
+    for coin in COINS:
+        try:
+            df = fetch_data(coin)
+            df = analisar_indicadores(df)
+            if verificar_sinal(df):
+                enviar_alerta(coin, df["close"].iloc[-1], df)
+        except Exception as e:
+            print(f"Erro com {coin}: {e}")
