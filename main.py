@@ -5,16 +5,31 @@ from ta.momentum import RSIIndicator
 from ta.trend import EMAIndicator, MACD
 from datetime import datetime
 from telegram import Bot
+import json
 
-# Configurações
+# Configurações de ambiente
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 API_KEY = os.getenv("CRYPTOCOMPARE_API_KEY")
 bot = Bot(token=TOKEN)
 
-# Lista de moedas e parâmetros
-COINS = ["BTC", "ETH", "XRP", "MATIC", "AVAX", "ADA", "DOGE"]
+# Lista de moedas da Neteller (com base nas imagens que enviaste)
+COINS = ["BTC", "ETH", "XRP", "ADA", "DOGE", "AVAX", "MATIC", "SOL", "DOT", "LTC", "BCH", "ATOM", "UNI", "APE", "CRV", "ANKR", "LINK", "ETC", "AAVE", "XTZ", "SHIB", "GRT", "EOS", "USDC", "SNX", "XLM", "ALGO", "1INCH", "MANA", "CHZ", "ICP"]
 LIMIT = 50
+
+# Guardar sinais para o resumo semanal
+SIGNALS_LOG = "signals_log.json"
+def carregar_sinais():
+    if os.path.exists(SIGNALS_LOG):
+        with open(SIGNALS_LOG, "r") as f:
+            return json.load(f)
+    return []
+
+def guardar_sinal(sinal):
+    sinais = carregar_sinais()
+    sinais.append(sinal)
+    with open(SIGNALS_LOG, "w") as f:
+        json.dump(sinais, f)
 
 def fetch_data(symbol):
     url = "https://min-api.cryptocompare.com/data/v2/histominute"
@@ -62,19 +77,28 @@ def enviar_alerta(moeda, preco, df):
     tp = preco + vol
     sl = preco - vol
     mensagem = (
-        f"💰 Alerta de compra antecipado para {moeda}!\n"
-        f"Preço atual: {preco:.2f} EUR\n"
-        f"🎯 Venda alvo: {tp:.2f} EUR\n"
-        f"⛔ Stop Loss: {sl:.2f} EUR"
+        f"\u2728 COMPRA antecipada: {moeda}\n"
+        f"\ud83d\udcb5 Preço: {preco:.2f} EUR\n"
+        f"\ud83c\udfaf Alvo venda: {tp:.2f} EUR\n"
+        f"\u26d4 Stop Loss: {sl:.2f} EUR"
     )
     bot.send_message(chat_id=CHAT_ID, text=mensagem)
+    guardar_sinal({"moeda": moeda, "preco": preco, "alvo": tp, "sl": sl, "hora": str(datetime.now())})
+
+def enviar_resumo():
+    sinais = carregar_sinais()
+    if not sinais:
+        bot.send_message(chat_id=CHAT_ID, text="Resumo semanal: Nenhum sinal gerado esta semana.")
+        return
+
+    texto = "\u2705 Resumo semanal:\n"
+    for sinal in sinais[-20:]:
+        texto += (f"{sinal['moeda']}: entrada a {sinal['preco']:.2f} | alvo: {sinal['alvo']:.2f} | SL: {sinal['sl']:.2f}\n")
+
+    bot.send_message(chat_id=CHAT_ID, text=texto)
 
 def main():
-    try:
-        bot.send_message(chat_id=CHAT_ID, text="🚀 A iniciar nova análise de mercado de criptomoedas...")
-    except Exception as e:
-        print(f"Erro ao enviar mensagem inicial: {e}")
-
+    bot.send_message(chat_id=CHAT_ID, text="\u23f0 A iniciar análise de oportunidades...")
     for coin in COINS:
         try:
             df = fetch_data(coin)
@@ -84,10 +108,8 @@ def main():
         except Exception as e:
             print(f"Erro com {coin}: {e}")
 
-    try:
-        bot.send_message(chat_id=CHAT_ID, text="✅ Análise concluída.")
-    except Exception as e:
-        print(f"Erro ao enviar mensagem final: {e}")
+    if datetime.now().weekday() == 6 and datetime.now().hour >= 22:
+        enviar_resumo()
 
 if __name__ == "__main__":
     main()
