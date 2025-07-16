@@ -48,7 +48,6 @@ def analisar_indicadores(df):
 
 def verificar_sinal(df):
     ult = df.iloc[-1]
-    # Condições combinadas
     return (
         ult["rsi"] < 30 and
         ult["macd_diff"] > 0 and
@@ -71,20 +70,10 @@ def enviar_alerta(moeda, preco, df):
     bot.send_message(chat_id=CHAT_ID, text=mensagem)
 
 def main():
-    for coin in COINS:
-        try:
-            df = fetch_data(coin)
-            df = analisar_indicadores(df)
-            if verificar_sinal(df):
-                enviar_alerta(coin, df["close"].iloc[-1], df)
-        except Exception as e:
-            print(f"Erro com {coin}: {e}")
-
-def main():
     try:
         bot.send_message(chat_id=CHAT_ID, text="🚀 A iniciar nova análise de mercado de criptomoedas...")
     except Exception as e:
-        print(f"Erro ao enviar mensagem de início: {e}")
+        print(f"Erro ao enviar mensagem inicial: {e}")
 
     for coin in COINS:
         try:
@@ -94,3 +83,11 @@ def main():
                 enviar_alerta(coin, df["close"].iloc[-1], df)
         except Exception as e:
             print(f"Erro com {coin}: {e}")
+
+    try:
+        bot.send_message(chat_id=CHAT_ID, text="✅ Análise concluída.")
+    except Exception as e:
+        print(f"Erro ao enviar mensagem final: {e}")
+
+if __name__ == "__main__":
+    main()
