@@ -2,7 +2,7 @@ name: Crypto Alerts
 
 on:
   schedule:
-    - cron: "*/1 * * * *"  # a cada 15 minutos
+    - cron: "*/2 * * * *"  # a cada 15 minutos
   workflow_dispatch:
 
 jobs:
