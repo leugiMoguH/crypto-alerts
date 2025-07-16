@@ -1,0 +1,37 @@
+name: Crypto Alerts
+
+on:
+  schedule:
+    - cron: "*/2 * * * *"  # a cada 15 minutos
+  workflow_dispatch:
+
+jobs:
+  run-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v3
+
+      - name: Limpar ambientes antigos
+        run: sudo rm -rf /opt/hostedtoolcache/Python/*
+
+      - name: Instalar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.9"
+
+      - name: Instalar dependências
+        run: |
+          sudo apt-get update && sudo apt-get install -y git
+          python -m pip install --upgrade pip
+          pip install --no-cache-dir --force-reinstall -r requirements.txt
+
+
+
+
+      - name: Executar alerta
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          CRYPTOCOMPARE_API_KEY: ${{ secrets.CRYPTOCOMPARE_API_KEY }}
+        run: python main.py
