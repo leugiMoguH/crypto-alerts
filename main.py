@@ -108,10 +108,10 @@ def main():
         except Exception as e:
             print(f"Erro com {coin}: {e}")
 
-        try:
-            bot.send_message(chat_id=CHAT_ID, text="✅ Análise concluída.")
-        except Exception as e:
-            print(f"Erro ao enviar mensagem final: {e}")
+    try:
+        bot.send_message(chat_id=CHAT_ID, text="✅ Análise concluída.")
+    except Exception as e:
+        print(f"Erro ao enviar mensagem final: {e}")
 
     if datetime.now().weekday() == 6 and datetime.now().hour >= 22:
         enviar_resumo()
