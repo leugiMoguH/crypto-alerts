@@ -63,6 +63,7 @@ def analisar_indicadores(df):
 
 def verificar_sinal(df):
     ult = df.iloc[-1]
+    print(f"[DEBUG] RSI: {ult['rsi']:.2f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.2f} | EMA: {ult['ema']:.2f}")
     return (
         ult["rsi"] < 30 and
         ult["macd_diff"] > 0 and
@@ -77,11 +78,15 @@ def enviar_alerta(moeda, preco, df):
     tp = preco + vol
     sl = preco - vol
     mensagem = (
-        f"\u2728 COMPRA antecipada: {moeda}\n"
-        f"\ud83d\udcb5 Preço: {preco:.2f} EUR\n"
-        f"\ud83c\udfaf Alvo venda: {tp:.2f} EUR\n"
-        f"\u26d4 Stop Loss: {sl:.2f} EUR"
+        f"✨ COMPRA antecipada: {moeda}
+"
+        f" Preço: {preco:.2f} EUR
+"
+        f" Alvo venda: {tp:.2f} EUR
+"
+        f"⛔ Stop Loss: {sl:.2f} EUR"
     )
+    print(f"[ENVIAR ALERTA] {mensagem}")
     bot.send_message(chat_id=CHAT_ID, text=mensagem)
     guardar_sinal({"moeda": moeda, "preco": preco, "alvo": tp, "sl": sl, "hora": str(datetime.now())})
 
@@ -91,27 +96,34 @@ def enviar_resumo():
         bot.send_message(chat_id=CHAT_ID, text="Resumo semanal: Nenhum sinal gerado esta semana.")
         return
 
-    texto = "\u2705 Resumo semanal:\n"
+    texto = "✅ Resumo semanal:"
     for sinal in sinais[-20:]:
-        texto += (f"{sinal['moeda']}: entrada a {sinal['preco']:.2f} | alvo: {sinal['alvo']:.2f} | SL: {sinal['sl']:.2f}\n")
+        texto += (f"{sinal['moeda']}: entrada a {sinal['preco']:.2f} | alvo: {sinal['alvo']:.2f} | SL: {sinal['sl']:.2f}")
 
     bot.send_message(chat_id=CHAT_ID, text=texto)
 
 def main():
-    bot.send_message(chat_id=CHAT_ID, text="\u23f0 A iniciar análise de oportunidades...")
+    print("[INÍCIO] A iniciar análise de oportunidades...")
+    houve_alertas = False
     for coin in COINS:
         try:
+            print(f"[ANÁLISE] {coin}")
             df = fetch_data(coin)
             df = analisar_indicadores(df)
             if verificar_sinal(df):
                 enviar_alerta(coin, df["close"].iloc[-1], df)
+                houve_alertas = True
         except Exception as e:
-            print(f"Erro com {coin}: {e}")
+            print(f"[ERRO] com {coin}: {e}")
+
+    if not houve_alertas:
+        print("[INFO] Nenhum alerta gerado neste ciclo.")
 
     try:
+        print("[FIM] Análise concluída.")
         bot.send_message(chat_id=CHAT_ID, text="✅ Análise concluída.")
     except Exception as e:
-        print(f"Erro ao enviar mensagem final: {e}")
+        print(f"[ERRO] ao enviar mensagem final: {e}")
 
     if datetime.now().weekday() == 6 and datetime.now().hour >= 22:
         enviar_resumo()
