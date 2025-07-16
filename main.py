@@ -78,12 +78,9 @@ def enviar_alerta(moeda, preco, df):
     tp = preco + vol
     sl = preco - vol
     mensagem = (
-        f"✨ COMPRA antecipada: {moeda}
-"
-        f" Preço: {preco:.2f} EUR
-"
-        f" Alvo venda: {tp:.2f} EUR
-"
+        f"✨ COMPRA antecipada: {moeda}"
+        f" Preço: {preco:.2f} EUR"
+        f" Alvo venda: {tp:.2f} EUR"
         f"⛔ Stop Loss: {sl:.2f} EUR"
     )
     print(f"[ENVIAR ALERTA] {mensagem}")
