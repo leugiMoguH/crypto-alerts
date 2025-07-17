@@ -64,6 +64,7 @@ def analisar_indicadores(df):
 
 def verificar_sinal(df):
     ult = df.iloc[-1]
+    print(f"[DEBUG] RSI: {ult['rsi']:.2f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.2f} | EMA: {ult['ema']:.2f}")
     prev = df.iloc[-2]
     condicoes = [
         ult["rsi"] < 30,
@@ -86,6 +87,7 @@ def enviar_alerta(moeda, preco, df):
         f"🎯 Alvo venda: {tp:.2f} EUR\n"
         f"⛔ Stop Loss: {sl:.2f} EUR"
     )
+    print(f"[ENVIAR ALERTA] {mensagem}")
     bot.send_message(chat_id=CHAT_ID, text=mensagem)
     guardar_sinal({"moeda": moeda, "preco": preco, "alvo": tp, "sl": sl, "hora": str(datetime.now())})
 
@@ -100,7 +102,10 @@ def enviar_resumo():
     bot.send_message(chat_id=CHAT_ID, text=texto)
 
 def main():
-    print("[INÍCIO] A iniciar análise de oportunidades...")
+    mensagem_inicio = "\u23f0 A iniciar análise de oportunidades..."
+    print(f"[INÍCIO] {mensagem_inicio}")
+    bot.send_message(chat_id=CHAT_ID, text=mensagem_inicio)
+    
     houve_alertas = False
     for coin in COINS:
         try:
