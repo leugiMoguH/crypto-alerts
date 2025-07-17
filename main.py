@@ -16,9 +16,8 @@ bot = Bot(token=TOKEN)
 # Lista de moedas da Neteller (com base nas imagens que enviaste)
 COINS = ["BTC", "ETH", "XRP", "ADA", "DOGE", "AVAX", "MATIC", "SOL", "DOT", "LTC", "BCH", "ATOM", "UNI", "APE", "CRV", "ANKR", "LINK", "ETC", "AAVE", "XTZ", "SHIB", "GRT", "EOS", "USDC", "SNX", "XLM", "ALGO", "1INCH", "MANA", "CHZ", "ICP"]
 LIMIT = 50
-
-# Guardar sinais para o resumo semanal
 SIGNALS_LOG = "signals_log.json"
+
 def carregar_sinais():
     if os.path.exists(SIGNALS_LOG):
         with open(SIGNALS_LOG, "r") as f:
@@ -57,20 +56,24 @@ def analisar_indicadores(df):
     df["macd_diff"] = macd.macd_diff()
     df["ema20"] = EMAIndicator(close=df["close"], window=20).ema_indicator()
     df["ema50"] = EMAIndicator(close=df["close"], window=50).ema_indicator()
+    df["ema200"] = EMAIndicator(close=df["close"], window=200).ema_indicator()
     df["vol_ma"] = df["volumefrom"].rolling(window=20).mean()
     df["volatilidade"] = df["high"] - df["low"]
+    df["candle_alta"] = df["close"] > df["open"]
     return df
 
 def verificar_sinal(df):
     ult = df.iloc[-1]
-    print(f"[DEBUG] RSI: {ult['rsi']:.2f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.2f} | EMA: {ult['ema']:.2f}")
-    return (
-        ult["rsi"] < 30 and
-        ult["macd_diff"] > 0 and
-        ult["close"] > ult["ema"] and
-        ult["ema20"] > ult["ema50"] and
-        ult["volumefrom"] > ult["vol_ma"]
-    )
+    prev = df.iloc[-2]
+    condicoes = [
+        ult["rsi"] < 30,
+        ult["macd_diff"] > 0,
+        ult["close"] > ult["ema"],
+        ult["ema20"] > ult["ema50"] > ult["ema200"],
+        ult["volumefrom"] > ult["vol_ma"],
+        ult["candle_alta"] and ult["close"] > prev["high"]  # Breakout técnico
+    ]
+    return all(condicoes)
 
 def enviar_alerta(moeda, preco, df):
     ult = df.iloc[-1]
@@ -78,12 +81,11 @@ def enviar_alerta(moeda, preco, df):
     tp = preco + vol
     sl = preco - vol
     mensagem = (
-        f"✨ COMPRA antecipada: {moeda}"
-        f" Preço: {preco:.2f} EUR"
-        f" Alvo venda: {tp:.2f} EUR"
+        f"✨ COMPRA antecipada: {moeda}\n"
+        f"💵 Preço: {preco:.2f} EUR\n"
+        f"🎯 Alvo venda: {tp:.2f} EUR\n"
         f"⛔ Stop Loss: {sl:.2f} EUR"
     )
-    print(f"[ENVIAR ALERTA] {mensagem}")
     bot.send_message(chat_id=CHAT_ID, text=mensagem)
     guardar_sinal({"moeda": moeda, "preco": preco, "alvo": tp, "sl": sl, "hora": str(datetime.now())})
 
@@ -92,18 +94,13 @@ def enviar_resumo():
     if not sinais:
         bot.send_message(chat_id=CHAT_ID, text="Resumo semanal: Nenhum sinal gerado esta semana.")
         return
-
-    texto = "✅ Resumo semanal:"
+    texto = "✅ Resumo semanal:\n"
     for sinal in sinais[-20:]:
-        texto += (f"{sinal['moeda']}: entrada a {sinal['preco']:.2f} | alvo: {sinal['alvo']:.2f} | SL: {sinal['sl']:.2f}")
-
+        texto += (f"{sinal['moeda']}: entrada a {sinal['preco']:.2f} | alvo: {sinal['alvo']:.2f} | SL: {sinal['sl']:.2f}\n")
     bot.send_message(chat_id=CHAT_ID, text=texto)
 
 def main():
-    mensagem_inicio = "\u23f0 A iniciar análise de oportunidades..."
-    print(f"[INÍCIO] {mensagem_inicio}")
-    bot.send_message(chat_id=CHAT_ID, text=mensagem_inicio)
-
+    print("[INÍCIO] A iniciar análise de oportunidades...")
     houve_alertas = False
     for coin in COINS:
         try:
