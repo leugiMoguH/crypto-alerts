@@ -64,7 +64,7 @@ def analisar_indicadores(df):
 
 def verificar_sinal(df):
     ult = df.iloc[-1]
-    print(f"[DEBUG] RSI: {ult['rsi']:.2f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.2f} | EMA: {ult['ema']:.2f}")
+    print(f"[DEBUG] RSI: {ult['rsi']:.4f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.2f} | EMA: {ult['ema']:.2f}")
     prev = df.iloc[-2]
     condicoes = [
         ult["rsi"] < 30,
@@ -83,9 +83,9 @@ def enviar_alerta(moeda, preco, df):
     sl = preco - vol
     mensagem = (
         f"✨ COMPRA antecipada: {moeda}\n"
-        f"💵 Preço: {preco:.2f} EUR\n"
-        f"🎯 Alvo venda: {tp:.2f} EUR\n"
-        f"⛔ Stop Loss: {sl:.2f} EUR"
+        f"💵 Preço: {preco:.4f} EUR\n"
+        f"🎯 Alvo venda: {tp:.4f} EUR\n"
+        f"⛔ Stop Loss: {sl:.4f} EUR"
     )
     print(f"[ENVIAR ALERTA] {mensagem}")
     bot.send_message(chat_id=CHAT_ID, text=mensagem)
@@ -98,7 +98,7 @@ def enviar_resumo():
         return
     texto = "✅ Resumo semanal:\n"
     for sinal in sinais[-20:]:
-        texto += (f"{sinal['moeda']}: entrada a {sinal['preco']:.2f} | alvo: {sinal['alvo']:.2f} | SL: {sinal['sl']:.2f}\n")
+        texto += (f"{sinal['moeda']}: entrada a {sinal['preco']:.4f} | alvo: {sinal['alvo']:.4f} | SL: {sinal['sl']:.4f}\n")
     bot.send_message(chat_id=CHAT_ID, text=texto)
 
 def main():
