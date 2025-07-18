@@ -98,9 +98,9 @@ def enviar_alerta(coin, preco, tp1, tp2, sl, grafico):
     mensagem = (
         f"🚨 ALERTA PREDITIVO\n"
         f"Moeda: {coin}\n"
-        f"Preço atual: {preco:.2f}€\n"
-        f"🎯 Take-Profit: {tp1:.2f}€ / {tp2:.2f}€\n"
-        f"🛑 Stop-Loss: {sl:.2f}€\n"
+        f"Preço atual: {preco:.4f}€\n"
+        f"🎯 Take-Profit: {tp1:.4f}€ / {tp2:.4f}€\n"
+        f"🛑 Stop-Loss: {sl:.4f}€\n"
         f"💰 Investimento: 1€"
     )
     bot.send_photo(chat_id=CHAT_ID, photo=grafico, caption=mensagem)
