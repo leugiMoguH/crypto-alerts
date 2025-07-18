@@ -109,13 +109,20 @@ def analisar_moeda(coin):
     df = fetch_data(coin)
     df = aplicar_indicadores(df)
     preco = df["close"].iloc[-1]
-    if ema_trend(df) and (
-        breakout_setup(df) or
-        pullback_setup(df) or
-        reteste_rejeitado(df) or
-        divergencia_macd_rsi(df) or
-        golden_cross(df) or
+
+    condicoes_validas = sum([
+        breakout_setup(df),
+        pullback_setup(df),
+        reteste_rejeitado(df),
+        divergencia_macd_rsi(df),
+        golden_cross(df),
         inside_bar_breakout(df)
+    ])
+
+    if (
+        ema_trend(df) and
+        condicoes_validas >= 2 and
+        df["rsi"].iloc[-1] > 50
     ):
         tp1 = preco * 1.15
         tp2 = preco * 1.30
