@@ -15,7 +15,7 @@ bot = Bot(token=TOKEN)
 
 # Lista de moedas da Neteller (com base nas imagens que enviaste)
 COINS = ["BTC", "ETH", "XRP", "ADA", "DOGE", "AVAX", "MATIC", "SOL", "DOT", "LTC", "BCH", "ATOM", "UNI", "APE", "CRV", "ANKR", "LINK", "ETC", "AAVE", "XTZ", "SHIB", "GRT", "EOS", "USDC", "SNX", "XLM", "ALGO", "1INCH", "MANA", "CHZ", "ICP"]
-LIMIT = 50
+LIMIT = 150
 SIGNALS_LOG = "signals_log.json"
 
 def carregar_sinais():
