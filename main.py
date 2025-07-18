@@ -64,7 +64,7 @@ def analisar_indicadores(df):
 
 def verificar_sinal(df):
     ult = df.iloc[-1]
-    print(f"[DEBUG] RSI: {ult['rsi']:.4f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.2f} | EMA: {ult['ema']:.2f}")
+    print(f"[DEBUG] RSI: {ult['rsi']:.4f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.4f} | EMA: {ult['ema']:.4f}")
     prev = df.iloc[-2]
     condicoes = [
         ult["rsi"] < 30,
