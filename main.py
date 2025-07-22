@@ -67,11 +67,13 @@ def verificar_sinal(df):
     print(f"[DEBUG] RSI: {ult['rsi']:.4f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.4f} | EMA: {ult['ema']:.4f}")
     prev = df.iloc[-2]
     condicoes = [
-        ult["rsi"] < 40,
+        ult["rsi"] > 45,
         ult["macd_diff"] > 0,
-        ult["close"] > ult["ema20"] and ult["ema20"] > ult["ema200"],
+        ult["close"] > ult["ema"],
+        ult["ema20"] > ult["ema200"],
         ult["volumefrom"] > 0.8 * ult["vol_ma"],
-        ult["candle_alta"]   # Não exige Breakout técnico
+        ult["candle_alta"],
+        ult["close"] > prev["close"]
     ]
     return all(condicoes)
 
