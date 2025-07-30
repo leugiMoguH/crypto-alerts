@@ -64,18 +64,20 @@ def analisar_indicadores(df):
 
 def verificar_sinal(df):
     ult = df.iloc[-1]
-    print(f"[DEBUG] RSI: {ult['rsi']:.4f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.4f} | EMA: {ult['ema']:.4f}")
     prev = df.iloc[-2]
+    print(f"[DEBUG] RSI: {ult['rsi']:.4f} | MACD Diff: {ult['macd_diff']:.4f} | Close: {ult['close']:.4f} | EMA: {ult['ema']:.4f}")
+    
     condicoes = [
-        ult["rsi"] > 45,
+        ult["rsi"] > 40,  # antes era 45
         ult["macd_diff"] > 0,
         ult["close"] > ult["ema"],
-        ult["ema20"] > ult["ema200"],
-        ult["volumefrom"] > 0.8 * ult["vol_ma"],
-        ult["candle_alta"],
+        ult["ema20"] > 0.97 * ult["ema200"],  # permite EMA20 ligeiramente abaixo
+        ult["volumefrom"] > 0.7 * ult["vol_ma"],  # antes era 0.8
+        ult["close"] > ult["open"],
         ult["close"] > prev["close"]
     ]
     return all(condicoes)
+
 
 def enviar_alerta(moeda, preco, df):
     ult = df.iloc[-1]
