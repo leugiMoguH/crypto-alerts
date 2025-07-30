@@ -119,16 +119,17 @@ def analisar_moeda(coin):
         inside_bar_breakout(df)
     ])
 
-    if (
-        ema_trend(df) and
-        condicoes_validas >= 2 and
-        df["rsi"].iloc[-1] > 50
-    ):
+    tendencia_ok = df["close"].iloc[-1] > 0.98 * df["ema200"].iloc[-1]
+    rsi_ok = df["rsi"].iloc[-1] > 48  # antes era 50
+    setups_ok = condicoes_validas >= 1  # antes era 2
+
+    if tendencia_ok and setups_ok and rsi_ok:
         tp1 = preco * 1.15
         tp2 = preco * 1.30
         sl = preco * 0.90
         grafico = gerar_grafico(df, coin)
         enviar_alerta(coin, preco, tp1, tp2, sl, grafico)
+
 
 def main():
     mensagem_inicio = "\u23f0 A iniciar análise de oportunidades (preditivas)..."
