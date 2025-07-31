@@ -71,8 +71,8 @@ def verificar_sinal(df):
         ult["rsi"] > 40,  # antes era 45
         ult["macd_diff"] > 0,
         ult["close"] > ult["ema"],
-        ult["ema20"] > 0.97 * ult["ema200"],  # permite EMA20 ligeiramente abaixo
-        ult["volumefrom"] > 0.7 * ult["vol_ma"],  # antes era 0.8
+        ult["ema20"] > 0.95 * ult["ema200"],  # permite EMA20 ligeiramente abaixo
+        ult["volumefrom"] > 0.6 * ult["vol_ma"],  # antes era 0.8
         ult["close"] > ult["open"],
         ult["close"] > prev["close"]
     ]
